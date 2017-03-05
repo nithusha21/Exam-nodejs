@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Post Questions</title>
+		<script src="javascripts/angular.min.js"></script>
+		<script src="javascripts/jquery.min.js"></script>
+	</head>
+	<body>
+		<form ng-app="postExam" ng-controller="postExamController" ng-submit="submit()">
+			<label for="name">Exam Name: <input type="textfield" ng-model="examName" placeholder="Name"></label>
+
+			<div ng-repeat="question in questions">
+				<fieldset>
+						<label>Question: <input type="textfield" ng-model="question.question" placeholder="Question"></label>
+						<div ng-repeat="option in question.options track by $index">
+							<label>Option{{$index + 1}}: <input type="textfield" ng-model="question.options[$index]" placeholder="Option"></label><br>
+						</div>
+						<select ng-options="option for option in question.options" value="{{option}}" ng-model="question.answer" required>
+						</select><br>
+						<input type="checkbox" ng-model="imgNeeded" value="Upload Image">
+						<input ng-show="imgNeeded" type="file" name="image" flie-model="question.image">
+						<button type="button" class="addOption{{$index + 1}}" ng-click="AddOption($event)">Add Option</button>
+					</div>
+				</fieldset>
+			</div>
+
+			<button type="button" class="addQuestion" ng-click="addQuestion1()">Add Question</button>
+			<input type="submit" class="submit" name="submit" value="Submit">
+		</form>
+		<script type="text/javascript">
+			var app = angular.module('postExam', [], function($locationProvider) {
+				$locationProvider.html5Mode(true);
+			});
+			app.service('submitform', ['$http', function($http){
+				this.post = function(uploadURL, data){
+					var fd = new FormData();
+					for(var key in data)
+						fd.append(key, data[key]);
+
+					console.log(fd);
+					$http.post(uploadURL, fd, {
+						transformRequest: angular.indentity,
+						headers: { 'Content-Type': undefined }
+					});
+				}
+			}]);
+
+			app.directive('fileModel',  ['$parse', function($parse){
+				return {
+					restrict: 'A',
+					link: function(scope, element, attrs){
+						var model = $parse(attrs.fileModel);
+						var modelSetter = model.assign;
+
+						element.bind('change', function(){
+							scope.$apply(function(){
+								modelSetter(scope, element[0].files[0]);
+							})
+						})
+					}
+				}
+			}]);
+
+			app.controller("postExamController",['$scope','$http', 'submitform', function($scope, $http, submitform){
+				$scope.count = 1;
+				$scope.examName = "";
+				$scope.questions = [];
+				$scope.questions.push({
+					question: "",
+					options: [""],
+					answer: "",
+					image: null
+				});
+				$scope.questionNo = 1;
+
+				$scope.AddOption = function(ev) {
+					$scope.count++;
+					var className = $(ev.currentTarget).attr('class');
+					var no = className[className.length - 1];
+					$scope.questions[no-1].options.push("");
+				}
+
+				$scope.addQuestion1 = function() {
+					$scope.questions.push({
+						question: "",
+						options: [""],
+						answer: ""
+					});
+				};
+
+				$scope.submit = function(){
+					console.log($scope.examName);
+					console.log($scope.questions);
+					submitform.post('/exam/withImage', {name: $scope.examName, examType: "MCQ", questions: $scope.questions});
+				}
+			}]);
+
+
+
+		</script>
+	</body>
+</html>

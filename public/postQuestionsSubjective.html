@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Post Questions</title>
+		<script src="javascripts/angular.min.js"></script>
+		<script src="javascripts/jquery.min.js"></script>
+	</head>
+	<body>
+		<form ng-app="postExam" ng-controller="postExamController" ng-submit="submit()">
+			<label for="name">Exam Name: <input type="textfield" ng-model="examName" placeholder="Name"></label>
+
+			<div ng-repeat="question in questions">
+				<fieldset>
+						<label>Question: <input type="textfield" ng-model="question.question" placeholder="Question"></label>
+						<label>Answer: <input type="textfield" ng-model="question.answer" placeholder="Answer"></label>
+				</fieldset>
+			</div>
+
+			<button type="button" class="addQuestion" ng-click="addQuestion()">Add Question</button>
+			<input type="submit" class="submit" name="submit" value="Submit">
+		</form>
+		<script type="text/javascript">
+			var app = angular.module('postExam', [], function($locationProvider) {
+				$locationProvider.html5Mode(true);
+			});
+			app.controller("postExamController",['$scope','$http', function($scope, $http){
+				$scope.examName = "";
+				$scope.questions = [];
+				$scope.questions.push({
+					question: "",
+					answer: ""
+				});
+				$scope.questionNo = 1;
+
+				$scope.addQuestion = function() {
+					$scope.questions.push({
+						question: "",
+						answer: ""
+					});
+				};
+
+				$scope.submit = function(){
+					console.log($scope.examName);
+					console.log($scope.questions);
+					$http.post('/exam/', {name: $scope.examName, examType: "Subjective", questions: $scope.questions});
+				}
+			}]);
+		</script>
+	</body>
+</html>

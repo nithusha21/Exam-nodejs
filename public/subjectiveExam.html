@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<base href="/exam.html"/>
+		<script src="javascripts/angular.min.js"></script>
+		<script src="javascripts/jquery.min.js" charset="utf-8"></script>
+
+		<link rel="stylesheet" href="stylesheets/bootstrap.min.css" media="screen" title="no title" charset="utf-8">
+		<style>
+			.submit{
+				font-size: 20px;
+			}
+			fieldset{
+				border: solid black 2px;
+				padding-left: 5px;
+				padding-top: 5px;
+				padding-bottom: 5px;
+			}
+		</style>
+		<title>Exam</title>
+	</head>
+	<body>
+		<div ng-app="test" ng-controller="testController" style="padding: 10px; padding-top: 5px" ng-init="numbering = ['A', 'B', 'C', 'D', 'E']">
+			<h1>Hello {{data.username}} of {{data.standard}}. Welcome to the {{name}}! All the Best!</h1>
+			<form class="form">
+
+				<div class="" style="padding: 15px" ng-repeat="question in questions" ng-init="ans=userResponse[$index]">
+					<fieldset>
+						<label for="question: {{question[0].question}}">Q{{$index + 1}}. {{question[0].question}}<br><br>
+						Answer:	<input type="textfield" ng-model="ans.answer">
+						</label>
+					</fieldset>
+				</div>
+
+			</form>
+
+			<div class="form-group">
+					<div class="col-sm-offset-5 col-sm-1">
+							<button class="btn btn-primary submit" ng-click="submit()">Submit</button>
+					</div>
+			</div>
+
+		</div>
+
+		<script type="text/javascript">
+			var app = angular.module('test', [], function($locationProvider) {
+				$locationProvider.html5Mode(true);
+			});
+			app.controller("testController",['$location', '$scope', '$http', '$window' ,function($location, $scope, $http, $window){
+				var params = $location.search();
+				//console.log(params);
+				$scope.params = params;
+				var user=params["user"]
+				$http.get('/users/'+user).then(function(response){
+					//console.log(response.data);
+					$scope.data = response.data;
+					var exam = response.data.exam;
+					$http.get('/exam/'+exam).then(function(response){
+						$scope.name = response.data.name;
+						var resData = response.data.questions;
+						$scope.questions = [];
+						while(resData.length > 0){
+							var index = Math.floor(Math.random() * resData.length);
+							$scope.questions.push(resData.splice(index, 1));
+						}
+						$scope.userResponse = [];
+						for(var i = 0; i < $scope.questions.length; i++){
+							console.log($scope.questions);
+							$scope.userResponse.push({question: $scope.questions[i][0].question, answer: ""});
+						}
+						console.log($scope.userResponse);
+
+					});
+					$scope.submit = function() {
+						var score = 0;
+						console.log($scope.questions);
+						console.log($scope.userResponse);
+						for(var i = 0; i < $scope.questions.length; i++){
+							if($scope.questions[i][0].answer.toLowerCase() === $scope.userResponse[i].answer.toLowerCase()){
+								score++;
+							}
+						}
+						//$window.alert("You have scored " + score + " marks");
+						console.log(score);
+
+						$http.put('/users/'+user+'/'+score);
+						$window.location.href = '/result.html?user='+user;
+					}
+				});
+			}]);
+		</script>
+
+		<script type="text/javascript">
+			$(document).ready(function() {
+				function disableBack() { window.history.forward() }
+
+				window.onload = disableBack();
+				window.onpageshow = function(evt) { if (evt.persisted) disableBack() }
+			});
+		</script>
+	</body>
+</html>

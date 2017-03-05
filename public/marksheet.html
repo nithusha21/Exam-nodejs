@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<script src="javascripts/angular.min.js"></script>
+		<title>marksheet</title>
+		<style media="screen">
+			table{
+				border: solid black;
+			}
+			th, td{
+				border: solid gray;
+				text-align: center;
+				width: 80px;
+			}
+		</style>
+	</head>
+	<h2>Marks report for the current ongoing exam</h2>
+	<body ng-app="marksheet">
+		<table ng-controller="marksheetController">
+			<tr id="header">
+				<th>
+					Name
+				</th>
+				<th>
+					Class
+				</th>
+				<th>
+					Marks Scored
+				</th>
+			</tr>
+
+			<tr ng-repeat="user in data">
+				<td>
+					{{user.username}}
+				</td>
+				<td>
+					{{user.standard}}
+				</td>
+				<td style="text-align: right; width: 150px">
+					{{user.marks}}
+				</td>
+			</tr>
+		</table>
+		<p>
+			Note: please copy the above namelist into an excel/word document to print and file.
+		</p>
+		<script type="text/javascript">
+			var app = angular.module('marksheet', [], function($locationProvider) {
+				$locationProvider.html5Mode(true);
+			});
+			app.controller("marksheetController",['$scope', '$http' ,function($scope, $http){
+				$http.get('/users/').then(function(response){
+					$scope.data = response.data;
+				});
+			}]);
+		</script>
+	</body>
+</html>

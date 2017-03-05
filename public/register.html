@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<script src="javascripts/angular.min.js"></script>
+		<link rel="stylesheet" href="stylesheets/bootstrap.min.css" media="screen" title="no title" charset="utf-8">
+		<style media="screen">
+			form{
+				padding-top: 15px;
+			}
+		</style>
+		<title>Register</title>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row row-content">
+				<div ng-app="register" ng-controller="optionController">
+					<form class="form-horizontal" name="Register" action="/users/register" method="POST">
+						<div class="form-group">
+							<label for="username" class="col-xs-2 control-label">Username</label>
+							<div class="col-xs-4">
+								<input type="text" class="form-control" id="username" name="username" placeholder="Enter Username">
+							</div>
+							<div class="col-xs-6"></div>
+						</div>
+						<div class="form-group">
+							<label for="standard" class="col-xs-2 control-label">Standard</label>
+							<div class="col-xs-4">
+								<input type="text" class="form-control" id="standard" name="standard" placeholder="Enter Standard">
+							</div>
+							<div class="col-xs-6"></div>
+						</div>
+
+						<div class="form-group">
+								<label for="exam" class="col-xs-2 control-label">Exam </label>
+								<select name="exam" ng-options="item._id as item.name for item in data" value="{{item._id}}" ng-model="selected">
+								</select><br>
+						</div>
+
+
+						<div class="form-group">
+								<div class="col-sm-offset-2 col-sm-10">
+										<button type="submit" class="btn btn-primary">Sign Up</button>
+								</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			var app = angular.module('register',[]);
+			app.controller("optionController",['$scope', '$http' ,function($scope, $http){
+				$http.get('/exam/all').then(function(response){
+					//console.log(response.data);
+					$scope.data = response.data;
+				});
+			}]);
+		</script>
+	</body>
+</html>
